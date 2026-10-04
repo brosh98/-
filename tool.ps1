@@ -7,7 +7,6 @@ Add-Type -AssemblyName System.Drawing
 # ==========================================
 $global:AllButtons = @()
 
-# مصفوفة الثيمات المتوفرة (يمكنك التعديل على الألوان بنظام Hex)
 $global:Themes = @(
     @{ Name="الوضع الليلي (Dark)";    Bg="#1E1E2E"; Tab="#28283C"; Btn="#3C3C55"; High="#2E8B57"; Text="#FFFFFF" },
     @{ Name="قرصنة (Matrix Hacker)"; Bg="#0D1117"; Tab="#161B22"; Btn="#0F5323"; High="#238636"; Text="#39FF14" },
@@ -16,7 +15,6 @@ $global:Themes = @(
     @{ Name="الوضع الفاتح (Light)";   Bg="#F3F4F6"; Tab="#E5E7EB"; Btn="#D1D5DB"; High="#3B82F6"; Text="#1F2937" }
 )
 
-# دالة مساعدة لتسجيل الأزرار وتجهيزها
 function Set-ModernButton ($btn, $isHighlight = $false) {
     $btn.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $btn.FlatAppearance.BorderSize = 0
@@ -26,7 +24,6 @@ function Set-ModernButton ($btn, $isHighlight = $false) {
     $global:AllButtons += $btn
 }
 
-# دالة تغيير الثيم وتطبيقه على كافة عناصر الأداة
 function Change-Theme($Index) {
     $t = $global:Themes[$Index]
     $bg = [System.Drawing.ColorTranslator]::FromHtml($t.Bg)
@@ -35,27 +32,21 @@ function Change-Theme($Index) {
     $high = [System.Drawing.ColorTranslator]::FromHtml($t.High)
     $txt = [System.Drawing.ColorTranslator]::FromHtml($t.Text)
 
-    # حفظ المتغيرات لرسم شريط التبويبات
     $global:CurrentTabColor = $tab
     $global:CurrentAccentColor = $btnBg
     $global:CurrentTextColor = $txt
 
-    # تغيير لون النافذة
     $form.BackColor = $bg
     $form.ForeColor = $txt
 
-    # تغيير لون التبويبات الداخلية
     foreach ($tp in $tabs.TabPages) { $tp.BackColor = $bg }
 
-    # تغيير لون قائمة البرامج
     $checkedListBoxPrograms.BackColor = $tab
     $checkedListBoxPrograms.ForeColor = $txt
 
-    # تغيير لون القائمة المنسدلة للثيمات
     $cmbTheme.BackColor = $tab
     $cmbTheme.ForeColor = $txt
 
-    # تحديث كافة الأزرار مع تأثيرات المرور (Hover)
     foreach ($btn in $global:AllButtons) {
         if ($btn.Tag -eq "Highlight") {
             $btn.BackColor = $high
@@ -66,20 +57,43 @@ function Change-Theme($Index) {
         }
         $btn.ForeColor = $txt
     }
-    $tabs.Invalidate() # إجبار شريط التبويبات على إعادة الرسم بالألوان الجديدة
+    $tabs.Invalidate()
 }
 
 # ==========================================
-# 1. مكتبة البرامج 
+# 1. مكتبة البرامج والأدوات الموسعة الشاملة
 # ==========================================
 $ProgramsLibrary = @(
-    @{ Name = "متصفح Google Chrome"; ID = "Google.Chrome" }
-    @{ Name = "متصفح Firefox"; ID = "Mozilla.Firefox" }
-    @{ Name = "مشغل VLC"; ID = "VideoLAN.VLC" }
-    @{ Name = "برنامج 7-Zip"; ID = "7zip.7zip" }
-    @{ Name = "برنامج WinRAR"; ID = "RARLab.WinRAR" }
-    @{ Name = "محرر VS Code"; ID = "Microsoft.VisualStudioCode" }
-    @{ Name = "برنامج Telegram"; ID = "Telegram.TelegramDesktop" }
+    # --- المتصفحات ---
+    @{ Name = "[متصفح] Google Chrome"; ID = "Google.Chrome" }
+    @{ Name = "[متصفح] Mozilla Firefox"; ID = "Mozilla.Firefox" }
+    @{ Name = "[متصفح] Brave Browser"; ID = "Brave.Brave" }
+    @{ Name = "[متصفح] Opera GX"; ID = "Opera.OperaGX" }
+    
+    # --- أدوات الضغط وفك الضغط ---
+    @{ Name = "[أدوات] 7-Zip (ضغط وفك ضغط)"; ID = "7zip.7zip" }
+    @{ Name = "[أدوات] WinRAR"; ID = "RARLab.WinRAR" }
+    
+    # --- الوسائط والمشغلات ---
+    @{ Name = "[وسائط] VLC Media Player"; ID = "VideoLAN.VLC" }
+    @{ Name = "[وسائط] Audacity (محرر صوتيات)"; ID = "Audacity.Audacity" }
+    @{ Name = "[وسائط] HandBrake (محول فيديو)"; ID = "HandBrake.HandBrake" }
+    
+    # --- أدوات وبرامج الدردشة ---
+    @{ Name = "[دردشة] Telegram Desktop"; ID = "Telegram.TelegramDesktop" }
+    @{ Name = "[دردشة] WhatsApp Desktop"; ID = "WhatsApp.WhatsApp" }
+    @{ Name = "[دردشة] Discord"; ID = "Discord.Discord" }
+    
+    # --- المبرمجين والمحررين ---
+    @{ Name = "[مطورين] Visual Studio Code"; ID = "Microsoft.VisualStudioCode" }
+    @{ Name = "[مطورين] Git (أداة إدارة الكود)"; ID = "Git.Git" }
+    @{ Name = "[مطورين] Python 3.11"; ID = "Python.Python.3.11" }
+    
+    # --- أدوات وصيانة النظام ---
+    @{ Name = "[صيانة] Revo Uninstaller (إزالة البرامج من جذورها)"; ID = "RevoUninstaller.RevoUninstaller" }
+    @{ Name = "[صيانة] CCleaner"; ID = "Piriform.CCleaner" }
+    @{ Name = "[صيانة] TeamViewer"; ID = "TeamViewer.TeamViewer" }
+    @{ Name = "[صيانة] AnyDesk"; ID = "AnyDesk.AnyDesk" }
 )
 
 # ==========================================
@@ -125,27 +139,32 @@ $tabs.Add_DrawItem({
 })
 
 # ==========================================
-# التبويب الأول: مكتبة البرامج
+# التبويب الأول: مكتبة البرامج والأدوات
 # ==========================================
 $tabPrograms = New-Object System.Windows.Forms.TabPage
-$tabPrograms.Text = "البرامج الأساسية"
+$tabPrograms.Text = "مكتبة البرامج"
 
 $checkedListBoxPrograms = New-Object System.Windows.Forms.CheckedListBox
 $checkedListBoxPrograms.Location = New-Object System.Drawing.Point(20, 20)
 $checkedListBoxPrograms.Size = New-Object System.Drawing.Size(580, 280)
 $checkedListBoxPrograms.CheckOnClick = $true
 $checkedListBoxPrograms.BorderStyle = [System.Windows.Forms.BorderStyle]::None
-$checkedListBoxPrograms.Font = New-Object System.Drawing.Font("Segoe UI", 11)
+$checkedListBoxPrograms.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 
 foreach ($prog in $ProgramsLibrary) { [void]$checkedListBoxPrograms.Items.Add($prog.Name) }
 
 $btnInstallSelected = New-Object System.Windows.Forms.Button
-$btnInstallSelected.Text = "تثبيت البرامج المحددة صامتاً"
+$btnInstallSelected.Text = "تثبيت البرامج والأدوات المحددة صامتاً"
 $btnInstallSelected.Location = New-Object System.Drawing.Point(20, 330)
 $btnInstallSelected.Size = New-Object System.Drawing.Size(580, 50)
-Set-ModernButton $btnInstallSelected $true # زر مميز (Highlight)
+Set-ModernButton $btnInstallSelected $true
 
 $btnInstallSelected.Add_Click({
+    if ($checkedListBoxPrograms.CheckedItems.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("يرجى تحديد برنامج واحد على الأقل من القائمة!", "تنبيه", 0, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+
     $btnInstallSelected.Text = "جاري التثبيت... يرجى الانتظار"
     $btnInstallSelected.Enabled = $false
     
@@ -154,8 +173,8 @@ $btnInstallSelected.Add_Click({
         Start-Process winget -ArgumentList "install --id $progID --exact --silent --accept-package-agreements --accept-source-agreements" -Wait -WindowStyle Hidden
     }
     
-    [System.Windows.Forms.MessageBox]::Show("تم الانتهاء من تثبيت البرامج المحددة!", "نجاح", 0, [System.Windows.Forms.MessageBoxIcon]::Information)
-    $btnInstallSelected.Text = "تثبيت البرامج المحددة صامتاً"
+    [System.Windows.Forms.MessageBox]::Show("تم الانتهاء من تثبيت البرامج المحددة بنجاح!", "نجاح", 0, [System.Windows.Forms.MessageBoxIcon]::Information)
+    $btnInstallSelected.Text = "تثبيت البرامج والأدوات المحددة صامتاً"
     $btnInstallSelected.Enabled = $true
 })
 
@@ -169,7 +188,6 @@ $tabs.Controls.Add($tabPrograms)
 $tabTweaks = New-Object System.Windows.Forms.TabPage
 $tabTweaks.Text = "تخصيص النظام"
 
-# --- قائمة تغيير ثيم الأداة ---
 $lblTheme = New-Object System.Windows.Forms.Label
 $lblTheme.Text = "مظهر الأداة:"
 $lblTheme.AutoSize = $true
@@ -184,7 +202,6 @@ foreach ($t in $global:Themes) { [void]$cmbTheme.Items.Add($t.Name) }
 $cmbTheme.SelectedIndex = 0
 $cmbTheme.Add_SelectedIndexChanged({ Change-Theme $cmbTheme.SelectedIndex })
 
-# --- أزرار النظام ---
 $btnDarkTheme = New-Object System.Windows.Forms.Button
 $btnDarkTheme.Text = "تفعيل الوضع الليلي للويندوز"
 $btnDarkTheme.Location = New-Object System.Drawing.Point(30, 100)
@@ -228,7 +245,7 @@ $btnSDIO = New-Object System.Windows.Forms.Button
 $btnSDIO.Text = "تثبيت Snappy Driver Installer Origin (SDIO)"
 $btnSDIO.Location = New-Object System.Drawing.Point(30, 110)
 $btnSDIO.Size = New-Object System.Drawing.Size(560, 55)
-Set-ModernButton $btnSDIO $true # زر مميز (Highlight)
+Set-ModernButton $btnSDIO $true
 
 $btnSDIO.Add_Click({
     $btnSDIO.Text = "جاري تحميل وتثبيت الأداة... يرجى الانتظار"
@@ -265,7 +282,7 @@ $btnRufus = New-Object System.Windows.Forms.Button
 $btnRufus.Text = "تحميل أداة الحرق Rufus"
 $btnRufus.Location = New-Object System.Drawing.Point(30, 180)
 $btnRufus.Size = New-Object System.Drawing.Size(560, 55)
-Set-ModernButton $btnRufus $true # زر مميز (Highlight)
+Set-ModernButton $btnRufus $true
 $btnRufus.Add_Click({ Start-Process "https://rufus.ie/" })
 
 $tabISOs.Controls.Add($btnWin11)
@@ -276,6 +293,6 @@ $tabs.Controls.Add($tabISOs)
 # ==========================================
 # تشغيل الواجهة
 # ==========================================
-Change-Theme 0 # تطبيق الثيم الأول الافتراضي عند التشغيل
+Change-Theme 0
 $form.Controls.Add($tabs)
 [void]$form.ShowDialog()
